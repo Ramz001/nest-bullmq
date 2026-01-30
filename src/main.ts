@@ -6,7 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  console.log(process.env.REDIS_HOST);
   const config = new DocumentBuilder()
     .setTitle('Nest Basic API Test')
     .setDescription('API docs')
