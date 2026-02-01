@@ -3,14 +3,25 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { ValidationPipe } from '@nestjs/common';
+import basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  console.log(process.env.REDIS_HOST);
+  app.use(
+    ['/docs', '/openapi', '/queues'],
+    basicAuth({
+      challenge: true,
+      users: { admin: process.env.BULL_BOARD_PASSWORD || '' },
+    }),
+  );
   const config = new DocumentBuilder()
     .setTitle('Nest Basic API Test')
     .setDescription('API docs')
     .setVersion('0.1')
+    .addSecurity('basic', {
+      type: 'http',
+      scheme: 'basic',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -20,10 +31,16 @@ async function bootstrap() {
   });
 
   app.use('/docs', apiReference({ content: document, theme: 'deepSpace' }));
+
   app.useGlobalPipes(new ValidationPipe());
+
   app.enableShutdownHooks();
+
   await app.listen(process.env.PORT || 3000);
 
   console.info(`Swagger: http://localhost:${process.env.PORT || 3000}/docs`);
+  console.info(
+    `Bull Board: http://localhost:${process.env.PORT || 3000}/queues`,
+  );
 }
 void bootstrap();

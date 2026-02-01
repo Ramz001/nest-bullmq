@@ -4,10 +4,11 @@ services:
     container_name: redis-stack
     restart: unless-stopped
     ports:
-      - '6379:6379' # Redis port
-      - '8001:8001' # RedisInsight web UI
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD} # Optional, recommended for production
+      - '6379:6379'
+      - '8001:8001'
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
 
