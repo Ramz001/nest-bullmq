@@ -2,6 +2,8 @@ services:
   redis-stack:
     image: redis/redis-stack:latest
     container_name: redis-stack
+    networks:
+      - bull_api_network
     restart: unless-stopped
     ports:
       - '6379:6379'
@@ -9,5 +11,22 @@ services:
     volumes:
       - redis_data:/data
 
+  app:
+    build: .
+    container_name: bullmq-app
+    networks:
+      - bull_api_network
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      - redis-stack
+    env_file:
+      - .env
+
 volumes:
   redis_data:
+
+networks:
+  bull_api_network:
+    driver: bridge
